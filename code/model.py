@@ -37,10 +37,10 @@ class INCEPTION_V3(nn.Module):
         x[:, 2] = (x[:, 2] - 0.406) / 0.225
         #
         # --> fixed-size input: batch x 3 x 299 x 299
-        x = nn.Upsample(size=(299, 299), mode='bilinear')(x)
+        x = F.interpolate(x, size=(299, 299), mode='bilinear', align_corners=True)
         # 299 x 299 x 3
         x = self.model(x)
-        x = nn.Softmax()(x)
+        x = F.softmax(x, dim=1)
         return x
 
 
@@ -52,7 +52,7 @@ class GLU(nn.Module):
         nc = x.size(1)
         assert nc % 2 == 0, 'channels dont divide 2!'
         nc = int(nc/2)
-        return x[:, :nc] * F.sigmoid(x[:, nc:])
+        return x[:, :nc] * torch.sigmoid(x[:, nc:])
 
 
 def conv3x3(in_planes, out_planes):
